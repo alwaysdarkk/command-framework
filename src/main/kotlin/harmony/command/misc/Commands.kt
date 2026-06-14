@@ -1,13 +1,13 @@
 package harmony.command.misc
 
-import harmony.command.*
-import it.unimi.dsi.fastutil.objects.*
-import org.bukkit.*
-import org.bukkit.command.*
-import org.bukkit.craftbukkit.v1_8_R3.*
-import org.bukkit.util.*
+import harmony.command.Instructor
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import org.bukkit.Bukkit
+import org.bukkit.command.Command
+import org.bukkit.command.CommandMap
+import org.bukkit.util.StringUtil
 
-val commandMap: SimpleCommandMap get() = (Bukkit.getServer() as CraftServer).commandMap
+val commandMap: CommandMap get() = Bukkit.getCommandMap()
 
 /**
  * Finds a command registered in the server by its name.
@@ -16,8 +16,7 @@ val commandMap: SimpleCommandMap get() = (Bukkit.getServer() as CraftServer).com
  * @return The [Command] if found, or `null` if no command with the given name exists.
  */
 fun findCommand(name: String): Command? {
-  return commandMap.getCommand(name)
-  //return commandMap.commands.find { it.name == name }
+    return commandMap.getCommand(name)
 }
 
 /**
@@ -29,7 +28,7 @@ fun findCommand(name: String): Command? {
  * @return The [Instructor] if found, or `null` if no such instructor exists.
  */
 fun findInstructor(name: String): Instructor? {
-  return findCommand(name) as? Instructor
+    return findCommand(name) as? Instructor
 }
 
 /**
@@ -39,7 +38,7 @@ fun findInstructor(name: String): Instructor? {
  * It associates the command with its label, making it available for use.
  */
 fun Command.register() {
-  commandMap.register(label, this)
+    commandMap.register(label, this)
 }
 
 /**
@@ -49,7 +48,7 @@ fun Command.register() {
  * effectively making it unavailable for use.
  */
 fun Command.unregister() {
-  this.unregister(commandMap)
+    this.unregister(commandMap)
 }
 
 /**
@@ -60,7 +59,7 @@ fun Command.unregister() {
  * @param command The name of the command to be unregistered.
  */
 fun unregisterCommand(command: String) {
-  findCommand(command)?.unregister(commandMap)
+    findCommand(command)?.unregister(commandMap)
 }
 
 /**
@@ -71,10 +70,10 @@ fun unregisterCommand(command: String) {
  * @param commands A list of command names to be unregistered.
  */
 fun unregisterCommands(vararg commands: String) {
-  val map = commandMap
-  for (cmd in commands) {
-    findCommand(cmd)?.unregister(map)
-  }
+    val map = commandMap
+    for (cmd in commands) {
+        findCommand(cmd)?.unregister(map)
+    }
 }
 
 /**
@@ -85,10 +84,10 @@ fun unregisterCommands(vararg commands: String) {
  * @param commands An iterable of command names to be unregistered.
  */
 fun unregisterCommands(commands: Iterable<String>) {
-  val map = commandMap
-  for (cmd in commands) {
-    findCommand(cmd)?.unregister(map)
-  }
+    val map = commandMap
+    for (cmd in commands) {
+        findCommand(cmd)?.unregister(map)
+    }
 }
 
 /**
@@ -103,12 +102,12 @@ fun unregisterCommands(commands: Iterable<String>) {
  * @return A mutable list of sorted, case-insensitive suggestions that match the last word.
  */
 fun tabComplete(lastWord: String, possibilities: Iterable<String>, sort: Boolean = true): List<String> {
-  val result = ObjectArrayList<String>()
-  possibilities.filterTo(result) { StringUtil.startsWithIgnoreCase(it, lastWord) }
-  if (sort) {
-    result.sortWith(String.CASE_INSENSITIVE_ORDER)
-  }
-  return result
+    val result = ObjectArrayList<String>()
+    possibilities.filterTo(result) { StringUtil.startsWithIgnoreCase(it, lastWord) }
+    if (sort) {
+        result.sortWith(String.CASE_INSENSITIVE_ORDER)
+    }
+    return result
 }
 
 /**
@@ -123,12 +122,12 @@ fun tabComplete(lastWord: String, possibilities: Iterable<String>, sort: Boolean
  * @return A mutable list of sorted, case-insensitive suggestions that match the last word.
  */
 fun tabComplete(lastWord: String, possibilities: Array<out String>, sort: Boolean = true): List<String> {
-  val result = ObjectArrayList<String>()
-  possibilities.filterTo(result) {it.startsWith(lastWord, ignoreCase = true) }
-  if (sort) {
-    result.sortWith(String.CASE_INSENSITIVE_ORDER)
-  }
-  return result
+    val result = ObjectArrayList<String>()
+    possibilities.filterTo(result) { it.startsWith(lastWord, ignoreCase = true) }
+    if (sort) {
+        result.sortWith(String.CASE_INSENSITIVE_ORDER)
+    }
+    return result
 }
 
 
@@ -144,7 +143,12 @@ fun tabComplete(lastWord: String, possibilities: Array<out String>, sort: Boolea
  * @param sort Whether to sort the suggestions alphabetically.
  * @return A mutable list of sorted, case-insensitive suggestions that match the last word.
  */
-inline fun <T> tabComplete(lastWord: String, entries: Collection<T>, sort: Boolean = true, transform: (T) -> String): List<String> {
-  return tabComplete(lastWord, entries.mapTo(ObjectArrayList(entries.size), transform), sort)
+inline fun <T> tabComplete(
+    lastWord: String,
+    entries: Collection<T>,
+    sort: Boolean = true,
+    transform: (T) -> String
+): List<String> {
+    return tabComplete(lastWord, entries.mapTo(ObjectArrayList(entries.size), transform), sort)
 }
 

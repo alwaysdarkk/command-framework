@@ -5,23 +5,23 @@ plugins {
 }
 
 group = "harmony.library"
-version = "1.2.0"
+version = "1.2.0-modern"
 
 repositories {
- // mavenLocal()
   mavenCentral()
+  maven("https://repo.papermc.io/repository/maven-public/")
   maven("https://jitpack.io")
 }
 
 dependencies {
-  //compileOnly("org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT") - jitpack not support local repositories...
-  compileOnly(fileTree("libs"))
-  compileOnly("it.unimi.dsi:fastutil:8.5.13")
+  implementation(kotlin("reflect"))
+
+  compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
   compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 }
 
 kotlin {
-  jvmToolchain(8)
+  jvmToolchain(21)
 }
 
 publishing {

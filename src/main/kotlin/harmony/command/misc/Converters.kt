@@ -1,9 +1,10 @@
 package harmony.command.misc
 
-import org.bukkit.*
-import org.bukkit.enchantments.*
-import org.bukkit.entity.*
-import org.bukkit.material.*
+import org.bukkit.GameMode
+import org.bukkit.Material
+import org.bukkit.Sound
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.EntityType
 
 /**
  * Converts a string representation of a sound name to a Sound instance.
@@ -11,7 +12,7 @@ import org.bukkit.material.*
  * @return The Sound instance associated with the given name, or null if not found.
  */
 fun String.toSound(): Sound? {
-  return runCatching { Sound.valueOf(uppercase()) }.getOrNull()
+    return runCatching { Sound.valueOf(uppercase()) }.getOrNull()
 }
 
 /**
@@ -21,23 +22,11 @@ fun String.toSound(): Sound? {
  * @return The EntityType instance associated with the given name or ID, or null if not found.
  */
 fun String.toEntityType(): EntityType? {
-  return runCatching {
-    EntityType.valueOf(uppercase())
-  }.recoverCatching {
-    EntityType.fromId(toInt())
-  }.getOrNull()
-}
-
-/**
- * Converts a string representation of a material and optional data to a MaterialData instance.
- *
- * @return The MaterialData instance created from the string, or null if the material or data is invalid.
- */
-fun String.toMaterialData(): MaterialData? {
-  val split = split(':', limit = 2)
-  val material = Material.matchMaterial(split[0]) ?: return null
-  val data = split[1].toByteOrNull() ?: return null
-  return MaterialData(material, data)
+    return runCatching {
+        EntityType.valueOf(uppercase())
+    }.recoverCatching {
+        EntityType.fromId(toInt())
+    }.getOrNull()
 }
 
 /**
@@ -46,12 +35,12 @@ fun String.toMaterialData(): MaterialData? {
  *
  * @return The GameMode instance associated with the given name or ID, or null if not found.
  */
-fun String.toGamemode(): GameMode? {
-  return runCatching {
-    GameMode.valueOf(uppercase())
-  }.recoverCatching {
-    GameMode.getByValue(toInt())
-  }.getOrNull()
+fun String.toGameMode(): GameMode? {
+    return runCatching {
+        GameMode.valueOf(uppercase())
+    }.recoverCatching {
+        GameMode.getByValue(toInt())
+    }.getOrNull()
 }
 
 /**
@@ -61,11 +50,9 @@ fun String.toGamemode(): GameMode? {
  * @return The Enchantment instance associated with the given name or ID, or null if not found.
  */
 fun String.toEnchantment(): Enchantment? {
-  return runCatching {
-    Enchantment.getByName(this)
-  }.recoverCatching {
-    Enchantment.getById(toInt())
-  }.getOrNull()
+    return runCatching {
+        Enchantment.getByName(this)
+    }.getOrNull()
 }
 
 
@@ -75,7 +62,7 @@ fun String.toEnchantment(): Enchantment? {
  * @return The Materials instance associated with the given name, or null if not found.
  */
 fun String.toMaterial(): Material? {
-  return Material.matchMaterial(uppercase())
+    return Material.matchMaterial(uppercase())
 }
 
 /**
@@ -85,5 +72,5 @@ fun String.toMaterial(): Material? {
  * @return The Materials instance associated with the given name, or AIR if not found.
  */
 fun String.toMaterialOrAir(): Material {
-  return Material.matchMaterial(uppercase()) ?: Material.AIR
+    return Material.matchMaterial(uppercase()) ?: Material.AIR
 }

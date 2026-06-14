@@ -1,8 +1,9 @@
 package harmony.command
 
-import org.bukkit.*
-import org.bukkit.command.*
-import org.bukkit.entity.*
+import org.bukkit.Bukkit
+import org.bukkit.command.CommandSender
+import org.bukkit.command.ConsoleCommandSender
+import org.bukkit.entity.Player
 
 /**
  * A basic implementation of [Context] for handling command execution logic.
@@ -15,31 +16,31 @@ import org.bukkit.entity.*
  * @property arguments The arguments passed along with the command.
  */
 class DefaultContext(
-  override val sender: CommandSender,
-  override val instructor: Instructor,
-  override val arguments: Array<out String>,
+    override val sender: CommandSender,
+    override val instructor: Instructor,
+    override val arguments: Array<out String>,
 ) : Context {
-  
-  /** The name of the command being executed, derived from the instructor. */
-  override val command: String get() = instructor.name
-  
-  /** Indicates if the sender is the console. */
-  override val isConsole: Boolean = sender is ConsoleCommandSender
-  
-  /** Indicates if the sender is a player. */
-  override val isPlayer: Boolean get() = !isConsole
-  
-  /** Provides the console sender instance. */
-  override val console: ConsoleCommandSender get() = Bukkit.getConsoleSender()
-  
-  /**
-   * Casts the sender to a player.
-   * @throws ClassCastException if the sender is not a player.
-   */
-  override val player: Player get() = sender as Player
-  
-  /** Tracks the current index of the argument being processed. */
-  override var currentIndex: Int = 0
+
+    /** The name of the command being executed, derived from the instructor. */
+    override val command: String get() = instructor.name
+
+    /** Indicates if the sender is the console. */
+    override val isConsole: Boolean = sender is ConsoleCommandSender
+
+    /** Indicates if the sender is a player. */
+    override val isPlayer: Boolean get() = !isConsole
+
+    /** Provides the console sender instance. */
+    override val console: ConsoleCommandSender get() = Bukkit.getConsoleSender()
+
+    /**
+     * Casts the sender to a player.
+     * @throws ClassCastException if the sender is not a player.
+     */
+    override val player: Player get() = sender as Player
+
+    /** Tracks the current index of the argument being processed. */
+    override var currentIndex: Int = 0
 }
 
 /**
@@ -53,31 +54,31 @@ class DefaultContext(
  * @property arguments The arguments passed along with the command.
  */
 class ConsoleContext(
-  override val sender: CommandSender,
-  override val instructor: Instructor,
-  override val arguments: Array<out String>,
+    override val sender: CommandSender,
+    override val instructor: Instructor,
+    override val arguments: Array<out String>,
 ) : Context {
-  
-  /** The name of the command being executed, derived from the instructor. */
-  override val command: String get() = instructor.name
-  
-  /** Always returns true, as this performer is for console use only. */
-  override val isConsole: Boolean get() = true
-  
-  /** Always returns false, as the console cannot be a player. */
-  override val isPlayer: Boolean get() = false
-  
-  /** Provides the console sender instance. */
-  override val console: ConsoleCommandSender = Bukkit.getConsoleSender()
-  
-  /**
-   * Throws an exception, as this performer cannot have a player as the sender.
-   * @throws IllegalStateException if accessed, as this performer is console-specific.
-   */
-  override val player: Player get() = fail("§cApenas o Console pode executar este comando.")
-  
-  /** Tracks the current index of the argument being processed. */
-  override var currentIndex: Int = 0
+
+    /** The name of the command being executed, derived from the instructor. */
+    override val command: String get() = instructor.name
+
+    /** Always returns true, as this performer is for console use only. */
+    override val isConsole: Boolean get() = true
+
+    /** Always returns false, as the console cannot be a player. */
+    override val isPlayer: Boolean get() = false
+
+    /** Provides the console sender instance. */
+    override val console: ConsoleCommandSender = Bukkit.getConsoleSender()
+
+    /**
+     * Throws an exception, as this performer cannot have a player as the sender.
+     * @throws IllegalStateException if accessed, as this performer is console-specific.
+     */
+    override val player: Player get() = fail("<red>Only console can run this command.".asComponent)
+
+    /** Tracks the current index of the argument being processed. */
+    override var currentIndex: Int = 0
 }
 
 /**
@@ -91,29 +92,29 @@ class ConsoleContext(
  * @property arguments The arguments passed along with the command.
  */
 class PlayerContext(
-  override val sender: CommandSender,
-  override val instructor: Instructor,
-  override val arguments: Array<out String>,
+    override val sender: CommandSender,
+    override val instructor: Instructor,
+    override val arguments: Array<out String>,
 ) : Context {
-  
-  /** The name of the command being executed, derived from the instructor. */
-  override val command: String get() = instructor.name
-  
-  /** Always returns false, as this performer is for player use only. */
-  override val isConsole: Boolean get() = false
-  
-  /** Always returns true, as the performer is for players. */
-  override val isPlayer: Boolean get() = true
-  
-  /**
-   * Throws an exception, as this performer cannot have a console as the sender.
-   * @throws IllegalStateException if accessed, as this performer is player-specific.
-   */
-  override val console: ConsoleCommandSender get() = fail("§cApenas jogadores podem executar este comando.")
-  
-  /** Casts the sender to a player. */
-  override val player: Player = sender as Player
-  
-  /** Tracks the current index of the argument being processed. */
-  override var currentIndex: Int = 0
+
+    /** The name of the command being executed, derived from the instructor. */
+    override val command: String get() = instructor.name
+
+    /** Always returns false, as this performer is for player use only. */
+    override val isConsole: Boolean get() = false
+
+    /** Always returns true, as the performer is for players. */
+    override val isPlayer: Boolean get() = true
+
+    /**
+     * Throws an exception, as this performer cannot have a console as the sender.
+     * @throws IllegalStateException if accessed, as this performer is player-specific.
+     */
+    override val console: ConsoleCommandSender get() = fail("<red>Only players can run this command.".asComponent)
+
+    /** Casts the sender to a player. */
+    override val player: Player = sender as Player
+
+    /** Tracks the current index of the argument being processed. */
+    override var currentIndex: Int = 0
 }

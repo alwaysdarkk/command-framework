@@ -9,28 +9,28 @@ package harmony.command
  * specific requirements.
  */
 fun interface CommandExceptionHandler {
-  
-  /**
-   * Handles an exception thrown during the execution of a command.
-   *
-   * @param exception The exception that was thrown during command execution.
-   * @param command The command instance associated with the execution.
-   * @param context The context in which the command was executed.
-   */
-  fun handle(exception: Exception, command: Instructor, context: Context)
-  
-  /**
-   * Merges this exception handler with another handler.
-   *
-   * @param other The other exception handler to merge with this one.
-   * @return The merged exception handler.
-   */
-  infix fun merge(other: CommandExceptionHandler): CommandExceptionHandler {
-    return CommandExceptionHandler { exception, command, context ->
-      this.handle(exception, command, context)
-      other.handle(exception, command, context)
+
+    /**
+     * Handles an exception thrown during the execution of a command.
+     *
+     * @param exception The exception that was thrown during command execution.
+     * @param command The command instance associated with the execution.
+     * @param context The context in which the command was executed.
+     */
+    fun handle(exception: Exception, command: Instructor, context: Context)
+
+    /**
+     * Merges this exception handler with another handler.
+     *
+     * @param other The other exception handler to merge with this one.
+     * @return The merged exception handler.
+     */
+    infix fun merge(other: CommandExceptionHandler): CommandExceptionHandler {
+        return CommandExceptionHandler { exception, command, context ->
+            this.handle(exception, command, context)
+            other.handle(exception, command, context)
+        }
     }
-  }
 }
 
 /**
@@ -40,22 +40,22 @@ fun interface CommandExceptionHandler {
  * and the user who executed it, and also prints the full stack trace for debugging purposes.
  */
 object DefaultExceptionHandler : CommandExceptionHandler {
-  override fun handle(exception: Exception, command: Instructor, context: Context) {
-    when (exception) {
-      is InstructorStop -> return
-      is InstructorError -> context.sender.sendMessage(exception.message)
-      else -> {
-        val sender = context.sender
-        if (sender.isOp) {
-          sender.sendMessage("§cUm erro inesperado ocorreu: '${exception.message}'")
-        } else {
-          sender.sendMessage("§cUm erro inesperado ocorreu. Contate um Administrador.")
+    override fun handle(exception: Exception, command: Instructor, context: Context) {
+        when (exception) {
+            is InstructorStop -> return
+            is InstructorError -> context.sender.sendMessage(exception.componentMessage)
+            else -> {
+                val sender = context.sender
+                if (sender.isOp) {
+                    sender.sendMessage("<red>An unexpected error occurred: '${exception.message}'".asComponent)
+                } else {
+                    sender.sendMessage("<red>An unexpected error occurred. Contact an staff.")
+                }
+                sender.server.logger.warning("Error executing command '${command.name}'. Executed by ${sender.name}")
+                exception.printStackTrace()
+            }
         }
-        sender.server.logger.warning("§cErro ao executar o comando '${command.name}'. Executado por ${sender.name}")
-        exception.printStackTrace()
-      }
     }
-  }
 }
 
 /**
@@ -65,10 +65,10 @@ object DefaultExceptionHandler : CommandExceptionHandler {
  * any errors and allowing the command execution to continue without intervention.
  */
 object IgnoreExceptionHandler : CommandExceptionHandler {
-  override fun handle(exception: Exception, command: Instructor, context: Context) {
-    // only handle InstructorErrors
-    if (exception is InstructorError) {
-      context.sender.sendMessage(exception.message)
+    override fun handle(exception: Exception, command: Instructor, context: Context) {
+        // only handle InstructorErrors
+        if (exception is InstructorError) {
+            context.sender.sendMessage(exception.componentMessage)
+        }
     }
-  }
 }

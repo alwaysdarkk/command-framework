@@ -2,6 +2,8 @@
 
 package harmony.command
 
+import net.kyori.adventure.text.Component
+
 /**
  * Common interface for exceptions that can occur during the execution of an instructor command.
  */
@@ -14,9 +16,9 @@ interface InstructorException
  * or when the `error` function from the [Context] interface is invoked.
  *
  * @constructor Initializes the error with a custom message.
- * @param message The detailed error message explaining the cause of the error.
+ * @param componentMessage The detailed error message explaining the cause of the error.
  */
-class InstructorError(message: String) : Exception(message), InstructorException
+class InstructorError(val componentMessage: Component) : Exception(componentMessage.serialize), InstructorException
 
 /**
  * Represents an exception that can be used to stop the execution of a command.
@@ -24,7 +26,7 @@ class InstructorError(message: String) : Exception(message), InstructorException
  * This exception can be thrown to signal that the command should be immediately halted,
  * without necessarily indicating an error condition.
  */
-object InstructorStop : Exception(), InstructorException
+class InstructorStop : Exception(), InstructorException
 
 /**
  * Represents an exception that can be used to signal an error condition in the command execution.
@@ -32,7 +34,8 @@ object InstructorStop : Exception(), InstructorException
  * This is only thrown when a exception is sended from a [CommandExceptionHandler].
  * @param cause The exception that was thrown.
  */
-class ExceptionHandlerError(cause: Throwable) : Exception("An exception was thrown from CommandExceptionHandler and was not handled", cause)
+class ExceptionHandlerError(cause: Throwable) :
+    Exception("An exception was thrown from CommandExceptionHandler and was not handled", cause)
 
 /**
  * Throws an [InstructorError] with the specified [message].
@@ -43,7 +46,7 @@ class ExceptionHandlerError(cause: Throwable) : Exception("An exception was thro
  * @param message The message explaining the reason for the error.
  * @throws InstructorError Always throws an exception with the given message.
  */
-inline fun Context.fail(message: String): Nothing = throw InstructorError(message)
+inline fun Context.fail(message: Component): Nothing = throw InstructorError(message)
 
 /**
  * Throws an [InstructorError] with the usage message of the current command.
@@ -53,7 +56,7 @@ inline fun Context.fail(message: String): Nothing = throw InstructorError(messag
  *
  * @throws InstructorError Always throws an exception with the usage message of the command.
  */
-inline fun Context.failUsage(): Nothing = throw InstructorError(instructor.usage)
+inline fun Context.failUsage(): Nothing = throw InstructorError(instructor.usage.asComponent)
 
 /**
  * Stops the execution of a command by throwing an [InstructorStop] exception.
@@ -63,4 +66,4 @@ inline fun Context.failUsage(): Nothing = throw InstructorError(instructor.usage
  *
  * @throws InstructorStop Always throws an exception to halt execution.
  */
-inline fun Context.stop(): Nothing = throw InstructorStop
+inline fun Context.stop(): Nothing = throw InstructorStop()

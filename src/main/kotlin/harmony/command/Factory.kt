@@ -1,7 +1,7 @@
 package harmony.command
 
-import harmony.command.misc.*
-import kotlin.time.*
+import harmony.command.misc.register
+import kotlin.time.Duration
 
 /**
  * Creates an instance of [Instructor] with the specified properties.
@@ -20,40 +20,40 @@ import kotlin.time.*
  * @return The created [Instructor] instance with all the provided properties applied.
  */
 internal fun internalBuildInstructor(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Instructor.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Instructor.() -> Unit,
 ) = Instructor(name.split('|')).apply {
-  this.sender = sender
-  this.maxArgs = max
-  if (permission != null) {
-    this.permission = permission
-  }
-  fullyName = name
-  if (usage != null) {
-    usageArguments = usage
-    this.usage = "§cUse: /${this.name} $usage."
-  }
-  if (completer != null) {
-    this.completer = completer
-  }
-  if (helpPermission != null) {
-    this.helpPermission = helpPermission
-  }
-  if (exceptionHandler != null) {
-    this.exceptionHandler = exceptionHandler
-  }
-  if (cooldown != null) {
-    this.cooldown = CommandCooldown(cooldown)
-  }
-  action(this)
+    this.sender = sender
+    this.maxArgs = max
+    if (permission != null) {
+        this.permission = permission
+    }
+    fullyName = name
+    if (usage != null) {
+        this.usageArguments = usage
+        this.componentUsageMessage = "<red>Use: /${this.name} $usage.".asComponent
+    }
+    if (completer != null) {
+        this.completer = completer
+    }
+    if (helpPermission != null) {
+        this.helpPermission = helpPermission
+    }
+    if (exceptionHandler != null) {
+        this.exceptionHandler = exceptionHandler
+    }
+    if (cooldown != null) {
+        this.cooldown = CommandCooldown(cooldown)
+    }
+    action(this)
 }
 
 /**
@@ -76,45 +76,45 @@ internal fun internalBuildInstructor(
  * @return The created [ChildrenInstructor] instance.
  */
 internal fun internalBuildChildrenInstructor(
-  parent: Instructor,
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  showHelp: Boolean = true,
-  extraInfo: Boolean = true,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Instructor.() -> Unit,
+    parent: Instructor,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    showHelp: Boolean = true,
+    extraInfo: Boolean = true,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Instructor.() -> Unit,
 ) = ChildrenInstructor(parent, name.split('|')).apply {
-  this.sender = sender
-  this.permission = permission ?: parent.permission
-  fullyName = fetchFullyName()
-  showInHelp = showHelp
-  this.extraInfo = extraInfo
-  this.maxArgs = max
-  if (usage != null) {
-    this.usageArguments = usage
-    this.usage = usage.let { "§cUse: /$fullyName $it." }
-  } else {
-    this.usage = parent.usage
-  }
-  if (completer != null) {
-    this.completer = completer
-  }
-  if (helpPermission != null) {
-    this.helpPermission = helpPermission
-  }
-  if (exceptionHandler != null) {
-    this.exceptionHandler = exceptionHandler
-  }
-  if (cooldown != null) {
-    this.cooldown = CommandCooldown(cooldown)
-  }
-  action(this)
+    this.sender = sender
+    this.permission = permission ?: parent.permission
+    fullyName = fetchFullyName()
+    showInHelp = showHelp
+    this.extraInfo = extraInfo
+    this.maxArgs = max
+    if (usage != null) {
+        this.usageArguments = usage
+        this.componentUsageMessage = "<red>Use: /${this.name} $usage.".asComponent
+    } else {
+        this.usage = parent.usage
+    }
+    if (completer != null) {
+        this.completer = completer
+    }
+    if (helpPermission != null) {
+        this.helpPermission = helpPermission
+    }
+    if (exceptionHandler != null) {
+        this.exceptionHandler = exceptionHandler
+    }
+    if (cooldown != null) {
+        this.cooldown = CommandCooldown(cooldown)
+    }
+    action(this)
 }
 
 /**
@@ -135,37 +135,37 @@ internal fun internalBuildChildrenInstructor(
  * @return The created [ChildrenInstructor] instance attached to the parent.
  */
 internal fun Instructor.internalAppendChildren(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  showHelp: Boolean = true,
-  extraInfo: Boolean = true,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Instructor.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    showHelp: Boolean = true,
+    extraInfo: Boolean = true,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Instructor.() -> Unit,
 ): ChildrenInstructor {
-  val children = internalBuildChildrenInstructor(
-    this,
-    name,
-    sender = sender,
-    permission = permission,
-    usage = usage,
-    max = max,
-    showHelp = showHelp,
-    extraInfo = extraInfo,
-    completer = completer,
-    helpPermission = helpPermission,
-    exceptionHandler = exceptionHandler,
-    cooldown = cooldown,
-    action = action
-  )
-  
-  addChildren(children)
-  return children
+    val children = internalBuildChildrenInstructor(
+        this,
+        name,
+        sender = sender,
+        permission = permission,
+        usage = usage,
+        max = max,
+        showHelp = showHelp,
+        extraInfo = extraInfo,
+        completer = completer,
+        helpPermission = helpPermission,
+        exceptionHandler = exceptionHandler,
+        cooldown = cooldown,
+        action = action
+    )
+
+    addChildren(children)
+    return children
 }
 
 /**
@@ -185,31 +185,31 @@ internal fun Instructor.internalAppendChildren(
  * @return The created and registered [Instructor] instance.
  */
 fun ComplexCommand(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Instructor.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Instructor.() -> Unit,
 ): Instructor {
-  val command = internalBuildInstructor(
-    name,
-    sender = sender,
-    permission = permission,
-    usage = usage,
-    max = max,
-    completer = completer,
-    helpPermission = helpPermission,
-    exceptionHandler = exceptionHandler,
-    cooldown = cooldown,
-    action = action
-  )
-  command.register()
-  return command
+    val command = internalBuildInstructor(
+        name,
+        sender = sender,
+        permission = permission,
+        usage = usage,
+        max = max,
+        completer = completer,
+        helpPermission = helpPermission,
+        exceptionHandler = exceptionHandler,
+        cooldown = cooldown,
+        action = action
+    )
+    command.register()
+    return command
 }
 
 /**
@@ -229,31 +229,31 @@ fun ComplexCommand(
  * @return The created and registered [Instructor] instance.
  */
 fun Command(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Context.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Context.() -> Unit,
 ): Instructor {
-  return internalBuildInstructor(
-    name,
-    sender = sender,
-    permission = permission,
-    usage = usage,
-    completer = completer,
-    helpPermission = helpPermission,
-    max = max,
-    exceptionHandler = exceptionHandler,
-    cooldown = cooldown
-  ) {
-    performs(action)
-    register()
-  }
+    return internalBuildInstructor(
+        name,
+        sender = sender,
+        permission = permission,
+        usage = usage,
+        completer = completer,
+        helpPermission = helpPermission,
+        max = max,
+        exceptionHandler = exceptionHandler,
+        cooldown = cooldown
+    ) {
+        performs(action)
+        register()
+    }
 }
 
 /**
@@ -273,31 +273,31 @@ fun Command(
  * @return The created and registered [Instructor] instance.
  */
 fun CommandAsync(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: suspend Context.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: suspend Context.() -> Unit,
 ): Instructor {
-  return internalBuildInstructor(
-    name,
-    sender = sender,
-    permission = permission,
-    usage = usage,
-    completer = completer,
-    helpPermission = helpPermission,
-    max = max,
-    exceptionHandler = exceptionHandler,
-    cooldown = cooldown
-  ) {
-    performsAsync(action)
-    register()
-  }
+    return internalBuildInstructor(
+        name,
+        sender = sender,
+        permission = permission,
+        usage = usage,
+        completer = completer,
+        helpPermission = helpPermission,
+        max = max,
+        exceptionHandler = exceptionHandler,
+        cooldown = cooldown
+    ) {
+        performsAsync(action)
+        register()
+    }
 }
 
 /**
@@ -322,31 +322,31 @@ fun CommandAsync(
  * @return A [ChildrenInstructor] representing the created alternate instructor.
  */
 fun Instructor.complex(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  showHelp: Boolean = true,
-  extraInfo: Boolean = true,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Instructor.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    showHelp: Boolean = true,
+    extraInfo: Boolean = true,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Instructor.() -> Unit,
 ): ChildrenInstructor = internalAppendChildren(
-  name,
-  sender = sender,
-  permission = permission,
-  usage = usage,
-  max = max,
-  showHelp = showHelp,
-  extraInfo = extraInfo,
-  completer = completer,
-  helpPermission = helpPermission,
-  exceptionHandler = exceptionHandler,
-  cooldown = cooldown,
-  action = action
+    name,
+    sender = sender,
+    permission = permission,
+    usage = usage,
+    max = max,
+    showHelp = showHelp,
+    extraInfo = extraInfo,
+    completer = completer,
+    helpPermission = helpPermission,
+    exceptionHandler = exceptionHandler,
+    cooldown = cooldown,
+    action = action
 )
 
 /**
@@ -371,32 +371,32 @@ fun Instructor.complex(
  * @return A [ChildrenInstructor] representing the created sub-instructor.
  */
 fun Instructor.sub(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  showHelp: Boolean = true,
-  extraInfo: Boolean = true,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: Context.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    showHelp: Boolean = true,
+    extraInfo: Boolean = true,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: Context.() -> Unit,
 ): ChildrenInstructor = internalAppendChildren(
-  name,
-  sender = sender,
-  permission = permission,
-  usage = usage,
-  max = max,
-  showHelp = showHelp,
-  extraInfo = extraInfo,
-  completer = completer,
-  helpPermission = helpPermission,
-  exceptionHandler = exceptionHandler,
-  cooldown = cooldown
+    name,
+    sender = sender,
+    permission = permission,
+    usage = usage,
+    max = max,
+    showHelp = showHelp,
+    extraInfo = extraInfo,
+    completer = completer,
+    helpPermission = helpPermission,
+    exceptionHandler = exceptionHandler,
+    cooldown = cooldown
 ) {
-  performs(action)
+    performs(action)
 }
 
 /**
@@ -421,30 +421,30 @@ fun Instructor.sub(
  * @return A [ChildrenInstructor] representing the created sub-instructor.
  */
 fun Instructor.subAsync(
-  name: String,
-  sender: Sender = Sender.ALL,
-  permission: String? = null,
-  usage: String? = null,
-  max: Int = -1,
-  showHelp: Boolean = true,
-  extraInfo: Boolean = true,
-  completer: Completer? = null,
-  helpPermission: String? = null,
-  exceptionHandler: CommandExceptionHandler? = null,
-  cooldown: Duration? = null,
-  action: suspend Context.() -> Unit,
+    name: String,
+    sender: Sender = Sender.ALL,
+    permission: String? = null,
+    usage: String? = null,
+    max: Int = -1,
+    showHelp: Boolean = true,
+    extraInfo: Boolean = true,
+    completer: Completer? = null,
+    helpPermission: String? = null,
+    exceptionHandler: CommandExceptionHandler? = null,
+    cooldown: Duration? = null,
+    action: suspend Context.() -> Unit,
 ): ChildrenInstructor = internalAppendChildren(
-  name,
-  sender = sender,
-  permission = permission,
-  usage = usage,
-  max = max,
-  showHelp = showHelp,
-  extraInfo = extraInfo,
-  completer = completer,
-  helpPermission = helpPermission,
-  exceptionHandler = exceptionHandler,
-  cooldown = cooldown,
+    name,
+    sender = sender,
+    permission = permission,
+    usage = usage,
+    max = max,
+    showHelp = showHelp,
+    extraInfo = extraInfo,
+    completer = completer,
+    helpPermission = helpPermission,
+    exceptionHandler = exceptionHandler,
+    cooldown = cooldown,
 ) {
-  performsAsync(action)
+    performsAsync(action)
 }

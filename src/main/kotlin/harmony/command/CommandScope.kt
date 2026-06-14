@@ -1,7 +1,8 @@
 package harmony.command
 
-import kotlinx.coroutines.*
-import kotlin.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlin.coroutines.CoroutineContext
 
 /**
  * An object that serves as a coroutine scope with a SupervisorJob.
@@ -10,5 +11,5 @@ import kotlin.coroutines.*
  * meaning that child coroutines can fail without cancelling the parent scope.
  */
 object CommandScope : CoroutineScope {
-  override val coroutineContext: CoroutineContext = SupervisorJob()
+    override val coroutineContext: CoroutineContext = SupervisorJob()
 }

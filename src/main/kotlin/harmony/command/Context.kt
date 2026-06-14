@@ -1,13 +1,15 @@
 package harmony.command
 
 import harmony.command.misc.*
-import net.md_5.bungee.api.chat.*
+import net.kyori.adventure.text.Component
 import org.bukkit.*
-import org.bukkit.command.*
-import org.bukkit.enchantments.*
-import org.bukkit.entity.*
-import org.bukkit.material.*
-import kotlin.reflect.*
+import org.bukkit.command.CommandSender
+import org.bukkit.command.ConsoleCommandSender
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.typeOf
 
 /**
  * Represents an object that holds an array of [String] arguments.
@@ -17,160 +19,160 @@ import kotlin.reflect.*
  * obtaining information about the sender who executed the command.
  */
 interface Context : Iterable<String> {
-  
-  /**
-   * The name of the command that holds all arguments.
-   *
-   * This property represents the base command that is being executed, and the
-   * arguments associated with it are stored in [arguments].
-   */
-  val command: String
-  
-  /**
-   * The instructor associated with this argumentable.
-   *
-   * The instructor is responsible for organizing and handling the command execution process.
-   */
-  val instructor: Instructor
-  
-  /**
-   * The current index of the argument sequence.
-   *
-   * This variable keeps track of the position of the current argument being processed
-   * in the [arguments] array. It is updated as arguments are retrieved or processed.
-   */
-  var currentIndex: Int
-  
-  /**
-   * The arguments of this argumentable object.
-   *
-   * This array contains all the arguments passed to the command. The arguments are stored
-   * as an array of [String] and can be accessed or manipulated using various utility functions.
-   */
-  val arguments: Array<out String>
-  
-  /**
-   * The sender who executed this command.
-   *
-   * This property represents the [CommandSender] who performed the command, which could be a
-   * player, console, or other type of sender in the Minecraft server environment.
-   */
-  val sender: CommandSender
-  
-  /**
-   * Verifies if the sender is the console.
-   *
-   * This property returns `true` if the sender is an instance of [ConsoleCommandSender],
-   * indicating that the command was executed from the console.
-   */
-  val isConsole: Boolean
-  
-  /**
-   * Verifies if the sender is a player.
-   *
-   * This property returns `true` if the sender is an instance of [Player], indicating
-   * that the command was executed by a player.
-   */
-  val isPlayer: Boolean
-  
-  /**
-   * Returns the sender as a console command sender.
-   *
-   * If the sender is not a console, an error will be thrown. This property allows access
-   * to the sender as a [ConsoleCommandSender].
-   *
-   * @throws InstructorError if the sender is not a console.
-   */
-  val console: ConsoleCommandSender
-  
-  /**
-   * Returns the sender as a player.
-   *
-   * If the sender is not a player, an error will be thrown. This property allows access
-   * to the sender as a [Player].
-   *
-   * @throws InstructorError if the sender is not a player.
-   */
-  val player: Player
-  
-  /**
-   * Retrieves an optional string argument at the specified [index].
-   *
-   * If the argument exists at the given index, it will be returned; otherwise, `null` is returned.
-   * Additionally, if a [permission] is specified, the sender must have that permission to access
-   * the argument, or an error will be thrown.
-   *
-   * @param index The index of the argument to retrieve (default is [currentIndex]).
-   * @param permission The permission required to retrieve the argument, if any.
-   * @return The argument at the specified index, or `null` if it doesn't exist.
-   * @throws InstructorError if the sender lacks the required permission.
-   */
-  fun optionalString(index: Int = currentIndex, permission: String? = null): String? {
-    val arg = arguments.getOrNull(index)
-    if (arg != null && permission != null && !sender.hasPermission(permission)) {
-      fail(instructor.permissionMessage)
+
+    /**
+     * The name of the command that holds all arguments.
+     *
+     * This property represents the base command that is being executed, and the
+     * arguments associated with it are stored in [arguments].
+     */
+    val command: String
+
+    /**
+     * The instructor associated with this argumentable.
+     *
+     * The instructor is responsible for organizing and handling the command execution process.
+     */
+    val instructor: Instructor
+
+    /**
+     * The current index of the argument sequence.
+     *
+     * This variable keeps track of the position of the current argument being processed
+     * in the [arguments] array. It is updated as arguments are retrieved or processed.
+     */
+    var currentIndex: Int
+
+    /**
+     * The arguments of this argumentable object.
+     *
+     * This array contains all the arguments passed to the command. The arguments are stored
+     * as an array of [String] and can be accessed or manipulated using various utility functions.
+     */
+    val arguments: Array<out String>
+
+    /**
+     * The sender who executed this command.
+     *
+     * This property represents the [CommandSender] who performed the command, which could be a
+     * player, console, or other type of sender in the Minecraft server environment.
+     */
+    val sender: CommandSender
+
+    /**
+     * Verifies if the sender is the console.
+     *
+     * This property returns `true` if the sender is an instance of [ConsoleCommandSender],
+     * indicating that the command was executed from the console.
+     */
+    val isConsole: Boolean
+
+    /**
+     * Verifies if the sender is a player.
+     *
+     * This property returns `true` if the sender is an instance of [Player], indicating
+     * that the command was executed by a player.
+     */
+    val isPlayer: Boolean
+
+    /**
+     * Returns the sender as a console command sender.
+     *
+     * If the sender is not a console, an error will be thrown. This property allows access
+     * to the sender as a [ConsoleCommandSender].
+     *
+     * @throws InstructorError if the sender is not a console.
+     */
+    val console: ConsoleCommandSender
+
+    /**
+     * Returns the sender as a player.
+     *
+     * If the sender is not a player, an error will be thrown. This property allows access
+     * to the sender as a [Player].
+     *
+     * @throws InstructorError if the sender is not a player.
+     */
+    val player: Player
+
+    /**
+     * Retrieves an optional string argument at the specified [index].
+     *
+     * If the argument exists at the given index, it will be returned; otherwise, `null` is returned.
+     * Additionally, if a [permission] is specified, the sender must have that permission to access
+     * the argument, or an error will be thrown.
+     *
+     * @param index The index of the argument to retrieve (default is [currentIndex]).
+     * @param permission The permission required to retrieve the argument, if any.
+     * @return The argument at the specified index, or `null` if it doesn't exist.
+     * @throws InstructorError if the sender lacks the required permission.
+     */
+    fun optionalString(index: Int = currentIndex, permission: String? = null): String? {
+        val arg = arguments.getOrNull(index)
+        if (arg != null && permission != null && !sender.hasPermission(permission)) {
+            fail(instructor.componentPermissionMessage)
+        }
+        currentIndex++
+        return arg
     }
-    currentIndex++
-    return arg
-  }
-  
-  /**
-   * Retrieves a string argument at the specified [index], or throws an error if it doesn't exist.
-   *
-   * This function attempts to retrieve the argument at the given [index]. If the argument does
-   * not exist, an [InstructorError] will be thrown with the specified [message].
-   * Additionally, if a [permission] is specified, the sender must have that permission to access
-   * the argument, or an error will be thrown.
-   *
-   * @param index The index of the argument to retrieve (default is [currentIndex]).
-   * @param message The message to display if the argument doesn't exist (default is [usage]).
-   * @param permission The permission required to retrieve the argument, if any.
-   * @return The argument at the specified index.
-   * @throws InstructorError if the argument doesn't exist or the sender lacks the required permission.
-   */
-  fun string(
-    index: Int = currentIndex,
-    message: String = usage,
-    permission: String? = null,
-  ): String = optionalString(index, permission) ?: fail(message)
-  
-  /**
-   * Returns this value or a default value if this is null.
-   *
-   * This function provides a convenient shorthand for returning `this` value if it is non-null,
-   * or the provided [value] if it is null.
-   *
-   * Equivalent to `this ?: value`.
-   *
-   * @param value The value to return if this is null.
-   * @return `this` if it is non-null, otherwise [value].
-   */
-  infix fun <T> T?.or(value: T): T = this ?: value
-  
-  /**
-   * The size of the argument array.
-   *
-   * This property returns the number of arguments in the [arguments] array.
-   */
-  val size get() = arguments.size
-  
-  /**
-   * Verifies if the argument array is empty.
-   *
-   * This function checks whether the [arguments] array contains any elements.
-   *
-   * @return `true` if the argument array is empty, `false` otherwise.
-   */
-  fun isEmpty() = arguments.isEmpty()
-  
-  /**
-   * Returns an iterator over the arguments in this argumentable object.
-   *
-   * This function allows the object to be used in `for` loops, iterating over the [arguments].
-   *
-   * @return An iterator over the arguments.
-   */
-  override fun iterator(): Iterator<String> = arguments.iterator()
+
+    /**
+     * Retrieves a string argument at the specified [index], or throws an error if it doesn't exist.
+     *
+     * This function attempts to retrieve the argument at the given [index]. If the argument does
+     * not exist, an [InstructorError] will be thrown with the specified [message].
+     * Additionally, if a [permission] is specified, the sender must have that permission to access
+     * the argument, or an error will be thrown.
+     *
+     * @param index The index of the argument to retrieve (default is [currentIndex]).
+     * @param message The message to display if the argument doesn't exist (default is [usage]).
+     * @param permission The permission required to retrieve the argument, if any.
+     * @return The argument at the specified index.
+     * @throws InstructorError if the argument doesn't exist or the sender lacks the required permission.
+     */
+    fun string(
+        index: Int = currentIndex,
+        message: String = usage,
+        permission: String? = null,
+    ): String = optionalString(index, permission) ?: fail(message.asComponent)
+
+    /**
+     * Returns this value or a default value if this is null.
+     *
+     * This function provides a convenient shorthand for returning `this` value if it is non-null,
+     * or the provided [value] if it is null.
+     *
+     * Equivalent to `this ?: value`.
+     *
+     * @param value The value to return if this is null.
+     * @return `this` if it is non-null, otherwise [value].
+     */
+    infix fun <T> T?.or(value: T): T = this ?: value
+
+    /**
+     * The size of the argument array.
+     *
+     * This property returns the number of arguments in the [arguments] array.
+     */
+    val size get() = arguments.size
+
+    /**
+     * Verifies if the argument array is empty.
+     *
+     * This function checks whether the [arguments] array contains any elements.
+     *
+     * @return `true` if the argument array is empty, `false` otherwise.
+     */
+    fun isEmpty() = arguments.isEmpty()
+
+    /**
+     * Returns an iterator over the arguments in this argumentable object.
+     *
+     * This function allows the object to be used in `for` loops, iterating over the [arguments].
+     *
+     * @return An iterator over the arguments.
+     */
+    override fun iterator(): Iterator<String> = arguments.iterator()
 }
 
 
@@ -212,10 +214,10 @@ operator fun Context.contains(index: Int): Boolean = index < size
  * @return The character at the specified index or `null` if not found.
  */
 fun Context.nullableChar(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Char? {
-  return optionalString(index, permission)?.firstOrNull()
+    return optionalString(index, permission)?.firstOrNull()
 }
 
 /**
@@ -231,12 +233,12 @@ fun Context.nullableChar(
  * @return The character at the specified index or `null` if not found.
  */
 fun Context.optionalChar(
-  index: Int = currentIndex,
-  invalid: String = "§cCaractere não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    invalid: String = "<red>Character not found.",
+    permission: String? = null,
 ): Char? {
-  val string = optionalString(index, permission) ?: return null
-  return string.firstOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: return null
+    return string.firstOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -253,13 +255,13 @@ fun Context.optionalChar(
  * @return The character at the specified index.
  */
 fun Context.char(
-  index: Int = currentIndex,
-  empty: String = usage,
-  invalid: String = "§cCaractere não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    invalid: String = "<red>Character not found.",
+    permission: String? = null,
 ): Char {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.firstOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.firstOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -272,10 +274,10 @@ fun Context.char(
  * @return The character array at the specified index or `null`.
  */
 fun Context.optionalCharArray(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): CharArray? {
-  return optionalString(index, permission)?.toCharArray()
+    return optionalString(index, permission)?.toCharArray()
 }
 
 /**
@@ -289,11 +291,11 @@ fun Context.optionalCharArray(
  * @return The character array at the specified index.
  */
 fun Context.charArray(
-  index: Int = currentIndex,
-  message: String = usage,
-  permission: String? = null,
+    index: Int = currentIndex,
+    message: String = usage,
+    permission: String? = null,
 ): CharArray {
-  return optionalCharArray(index, permission) ?: fail(message)
+    return optionalCharArray(index, permission) ?: fail(message.asComponent)
 }
 
 /**
@@ -308,10 +310,10 @@ fun Context.charArray(
  * @return The boolean value at the specified index or `null`.
  */
 fun Context.nullableBoolean(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Boolean? {
-  return optionalString(index, permission)?.toBooleanStrictOrNull()
+    return optionalString(index, permission)?.toBooleanStrictOrNull()
 }
 
 /**
@@ -327,12 +329,12 @@ fun Context.nullableBoolean(
  * @return The boolean value at the specified index or `null`.
  */
 fun Context.optionalBoolean(
-  index: Int = currentIndex,
-  invalid: String = "§cValor true/false inválido.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    invalid: String = "<red>Invalid true/false value.",
+    permission: String? = null,
 ): Boolean? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toBooleanStrictOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: return null
+    return string.toBooleanStrictOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -349,13 +351,13 @@ fun Context.optionalBoolean(
  * @return The boolean value at the specified index.
  */
 fun Context.boolean(
-  index: Int = currentIndex,
-  empty: String = usage,
-  invalid: String = "§cValor true/false inválido.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    invalid: String = "<red>Invalid true/false value.",
+    permission: String? = null,
 ): Boolean {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toBooleanStrictOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toBooleanStrictOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -370,10 +372,10 @@ fun Context.boolean(
  * @return The byte value at the specified index or `null`.
  */
 fun Context.nullableByte(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Byte? {
-  return optionalString(index, permission)?.toByteOrNull()
+    return optionalString(index, permission)?.toByteOrNull()
 }
 
 /**
@@ -389,12 +391,12 @@ fun Context.nullableByte(
  * @return The byte value at the specified index or `null`.
  */
 fun Context.optionalByte(
-  index: Int = currentIndex,
-  invalid: String = "§cValor numérico Byte não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    invalid: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Byte? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toByteOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: return null
+    return string.toByteOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -411,13 +413,13 @@ fun Context.optionalByte(
  * @return The byte value at the specified index.
  */
 fun Context.byte(
-  index: Int = currentIndex,
-  empty: String = usage,
-  invalid: String = "§cValor numérico Byte não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    invalid: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Byte {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toByteOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toByteOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -432,10 +434,10 @@ fun Context.byte(
  * @return The short value at the specified index or `null`.
  */
 fun Context.nullableShort(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Short? {
-  return optionalString(index, permission)?.toShortOrNull()
+    return optionalString(index, permission)?.toShortOrNull()
 }
 
 /**
@@ -451,12 +453,12 @@ fun Context.nullableShort(
  * @return The short value at the specified index or `null`.
  */
 fun Context.optionalShort(
-  index: Int = currentIndex,
-  invalid: String = "§cValor numérico Short não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    invalid: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Short? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toShortOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: return null
+    return string.toShortOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -473,13 +475,13 @@ fun Context.optionalShort(
  * @return The short value at the specified index.
  */
 fun Context.short(
-  index: Int = currentIndex,
-  empty: String = usage,
-  invalid: String = "§cValor numérico Short não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    invalid: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Short {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toShortOrNull() ?: fail(invalid)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toShortOrNull() ?: fail(invalid.asComponent)
 }
 
 /**
@@ -494,10 +496,10 @@ fun Context.short(
  * @return The nullable integer value at the specified index, or null if not found.
  */
 fun Context.nullableInt(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Int? {
-  return optionalString(index, permission)?.toIntOrNull()
+    return optionalString(index, permission)?.toIntOrNull()
 }
 
 /**
@@ -513,12 +515,12 @@ fun Context.nullableInt(
  * @return The optional integer value at the specified index, or null if not found.
  */
 fun Context.optionalInt(
-  index: Int = currentIndex,
-  found: String = "§cValor numérico Int não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Int? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toIntOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toIntOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -535,13 +537,13 @@ fun Context.optionalInt(
  * @return The integer value at the specified index.
  */
 fun Context.int(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cValor numérico Int não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Int {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toIntOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toIntOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -556,10 +558,10 @@ fun Context.int(
  * @return The nullable long value at the specified index, or null if not found.
  */
 fun Context.nullableLong(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Long? {
-  return optionalString(index, permission)?.toLongOrNull()
+    return optionalString(index, permission)?.toLongOrNull()
 }
 
 /**
@@ -575,12 +577,12 @@ fun Context.nullableLong(
  * @return The optional long value at the specified index, or null if not found.
  */
 fun Context.optionalLong(
-  index: Int = currentIndex,
-  found: String = "§cValor numérico Long não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Long? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toLongOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toLongOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -597,13 +599,13 @@ fun Context.optionalLong(
  * @return The long value at the specified index.
  */
 fun Context.long(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cValor numérico Long não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Long {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toLongOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toLongOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -618,10 +620,10 @@ fun Context.long(
  * @return The nullable float value at the specified index, or null if not found.
  */
 fun Context.nullableFloat(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Float? {
-  return optionalString(index, permission)?.toFloatOrNull()
+    return optionalString(index, permission)?.toFloatOrNull()
 }
 
 /**
@@ -637,12 +639,12 @@ fun Context.nullableFloat(
  * @return The optional float value at the specified index, or null if not found.
  */
 fun Context.optionalFloat(
-  index: Int = currentIndex,
-  found: String = "§cValor numérico Float não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Float? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toFloatOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toFloatOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -659,13 +661,13 @@ fun Context.optionalFloat(
  * @return The float value at the specified index.
  */
 fun Context.float(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cValor numérico Float não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Float {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toFloatOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toFloatOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -680,10 +682,10 @@ fun Context.float(
  * @return The nullable double value at the specified index, or null if not found.
  */
 fun Context.nullableDouble(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Double? {
-  return optionalString(index, permission)?.toDoubleOrNull()
+    return optionalString(index, permission)?.toDoubleOrNull()
 }
 
 /**
@@ -699,12 +701,12 @@ fun Context.nullableDouble(
  * @return The optional double value at the specified index, or null if not found.
  */
 fun Context.optionalDouble(
-  index: Int = currentIndex,
-  found: String = "§cValor numérico Double não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Double? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toDoubleOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toDoubleOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -721,13 +723,13 @@ fun Context.optionalDouble(
  * @return The double value at the specified index.
  */
 fun Context.double(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cValor numérico Double não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>The value entered is invalid.",
+    permission: String? = null,
 ): Double {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toDoubleOrNull() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toDoubleOrNull() ?: fail(found.asComponent)
 }
 
 /**
@@ -747,10 +749,10 @@ fun Context.double(
  * @return The `Player` object associated with the provided name or `null` if not found.
  */
 fun Context.nullablePlayer(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Player? {
-  return optionalString(index, permission)?.let { Bukkit.getPlayer(it) }
+    return optionalString(index, permission)?.let { Bukkit.getPlayer(it) }
 }
 
 /**
@@ -771,12 +773,12 @@ fun Context.nullablePlayer(
  * @return The `Player` object associated with the provided name or `null` if not found.
  */
 fun Context.optionalPlayer(
-  index: Int = currentIndex,
-  found: String = "§cJogador não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This player could not be found.",
+    permission: String? = null,
 ): Player? {
-  val name = optionalString(index, permission) ?: return null
-  return Bukkit.getPlayer(name) ?: fail(found)
+    val name = optionalString(index, permission) ?: return null
+    return Bukkit.getPlayer(name) ?: fail(found.asComponent)
 }
 
 /**
@@ -799,13 +801,13 @@ fun Context.optionalPlayer(
  * @return The `Player` object associated with the provided name.
  */
 fun Context.player(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cJogador não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This player could not be found.",
+    permission: String? = null,
 ): Player {
-  val name = optionalString(index, permission) ?: fail(empty)
-  return Bukkit.getPlayer(name) ?: fail(found)
+    val name = optionalString(index, permission) ?: fail(empty.asComponent)
+    return Bukkit.getPlayer(name) ?: fail(found.asComponent)
 }
 
 /**
@@ -829,12 +831,13 @@ fun Context.player(
  * @return The `Player` object associated with the provided name or the sender if the sender is a player.
  */
 fun Context.playerOrSender(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cJogador não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This player could not be found.",
+    permission: String? = null,
 ): Player {
-  return if (isConsole) player(index, empty, found, permission) else optionalPlayer(index, found, permission) ?: player
+    return if (isConsole) player(index, empty, found, permission) else optionalPlayer(index, found, permission)
+        ?: player
 }
 
 /**
@@ -855,12 +858,12 @@ fun Context.playerOrSender(
  * @return The `OfflinePlayer` object associated with the provided name or `null` if not found.
  */
 fun Context.nullableOfflinePlayer(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): OfflinePlayer? {
-  val name = optionalString(index, permission) ?: return null
-  val player = Bukkit.getOfflinePlayer(name)
-  return if (player.name == null) null else player
+    val name = optionalString(index, permission) ?: return null
+    val player = Bukkit.getOfflinePlayer(name)
+    return if (player.name == null) null else player
 }
 
 /**
@@ -881,13 +884,13 @@ fun Context.nullableOfflinePlayer(
  * @return The `OfflinePlayer` object associated with the provided name or `null` if not found.
  */
 fun Context.optionalOfflinePlayer(
-  index: Int = currentIndex,
-  found: String = "§cJogador não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This player could not be found.",
+    permission: String? = null,
 ): OfflinePlayer? {
-  val name = optionalString(index, permission) ?: return null
-  val player = Bukkit.getOfflinePlayer(name)
-  return if (player.name == null) fail(found) else player
+    val name = optionalString(index, permission) ?: return null
+    val player = Bukkit.getOfflinePlayer(name)
+    return if (player.name == null) fail(found.asComponent) else player
 }
 
 /**
@@ -910,14 +913,14 @@ fun Context.optionalOfflinePlayer(
  * @return The `OfflinePlayer` object associated with the provided name.
  */
 fun Context.offlinePlayer(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cJogador não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This player could not be found.",
+    permission: String? = null,
 ): OfflinePlayer {
-  val name = optionalString(index, permission) ?: fail(empty)
-  val player = Bukkit.getOfflinePlayer(name)
-  return if (player.name == null) fail(found) else player
+    val name = optionalString(index, permission) ?: fail(empty.asComponent)
+    val player = Bukkit.getOfflinePlayer(name)
+    return if (player.name == null) fail(found.asComponent) else player
 }
 
 /**
@@ -936,11 +939,11 @@ fun Context.offlinePlayer(
  * @param permission Optional permission required to access the argument.
  * @return The corresponding `GameMode` object if found, or null if the index is invalid or the game mode does not exist.
  */
-fun Context.nullableGamemode(
-  index: Int = currentIndex,
-  permission: String? = null,
+fun Context.nullableGameMode(
+    index: Int = currentIndex,
+    permission: String? = null,
 ): GameMode? {
-  return optionalString(index, permission)?.toGamemode()
+    return optionalString(index, permission)?.toGameMode()
 }
 
 /**
@@ -960,13 +963,13 @@ fun Context.nullableGamemode(
  * @param permission Optional permission required to access the argument.
  * @return The corresponding `GameMode` object if found, or null if the index is invalid or the game mode does not exist.
  */
-fun Context.optionalGamemode(
-  index: Int = currentIndex,
-  found: String = "§cMode de jogo não encontrado.",
-  permission: String? = null,
+fun Context.optionalGameMode(
+    index: Int = currentIndex,
+    found: String = "<red>This game mode was not found.",
+    permission: String? = null,
 ): GameMode? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toGamemode() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toGameMode() ?: fail(found.asComponent)
 }
 
 /**
@@ -987,14 +990,14 @@ fun Context.optionalGamemode(
  * @param permission Optional permission required to access the argument.
  * @return The corresponding `GameMode` object associated with the provided name.
  */
-fun Context.gamemode(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cMode de jogo não encontrado.",
-  permission: String? = null,
+fun Context.gameMode(
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This game mode was not found.",
+    permission: String? = null,
 ): GameMode {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toGamemode() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toGameMode() ?: fail(found.asComponent)
 }
 
 /**
@@ -1014,10 +1017,10 @@ fun Context.gamemode(
  * @return The corresponding `Enchantment` object if found, or null if the index is invalid or the enchantment does not exist.
  */
 fun Context.nullableEnchantment(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Enchantment? {
-  return optionalString(index, permission)?.toEnchantment()
+    return optionalString(index, permission)?.toEnchantment()
 }
 
 /**
@@ -1038,12 +1041,12 @@ fun Context.nullableEnchantment(
  * @return The corresponding `Enchantment` object if found, or null if the index is invalid or the enchantment does not exist.
  */
 fun Context.optionalEnchantment(
-  index: Int = currentIndex,
-  found: String = "§cEncantamento não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This enchantment was not found.",
+    permission: String? = null,
 ): Enchantment? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toEnchantment() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toEnchantment() ?: fail(found.asComponent)
 }
 
 /**
@@ -1065,13 +1068,13 @@ fun Context.optionalEnchantment(
  * @return The corresponding `Enchantment` object associated with the provided name.
  */
 fun Context.enchantment(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cEncantamento não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This enchantment was not found.",
+    permission: String? = null,
 ): Enchantment {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toEnchantment() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toEnchantment() ?: fail(found.asComponent)
 }
 
 /**
@@ -1091,10 +1094,10 @@ fun Context.enchantment(
  * @return The corresponding `World` object if found, or null if the index is invalid or the world does not exist.
  */
 fun Context.nullableWorld(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): World? {
-  return optionalString(index, permission)?.let { Bukkit.getWorld(it) }
+    return optionalString(index, permission)?.let { Bukkit.getWorld(it) }
 }
 
 /**
@@ -1115,12 +1118,12 @@ fun Context.nullableWorld(
  * @return The corresponding `World` object if found, or null if the index is invalid or the world does not exist.
  */
 fun Context.optionalWorld(
-  index: Int = currentIndex,
-  found: String = "§cMundo não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This world was not found.",
+    permission: String? = null,
 ): World? {
-  val string = optionalString(index, permission) ?: return null
-  return Bukkit.getWorld(string) ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return Bukkit.getWorld(string) ?: fail(found.asComponent)
 }
 
 /**
@@ -1142,13 +1145,13 @@ fun Context.optionalWorld(
  * @return The corresponding `World` object associated with the provided name.
  */
 fun Context.world(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cMundo não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This world was not found.",
+    permission: String? = null,
 ): World {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return Bukkit.getWorld(string) ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return Bukkit.getWorld(string) ?: fail(found.asComponent)
 }
 
 /**
@@ -1168,10 +1171,10 @@ fun Context.world(
  * @return The corresponding `Materials` object if found, or null if the index is invalid or the material does not exist.
  */
 fun Context.nullableMaterial(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Material? {
-  return optionalString(index, permission)?.toMaterial()
+    return optionalString(index, permission)?.toMaterial()
 }
 
 /**
@@ -1192,12 +1195,12 @@ fun Context.nullableMaterial(
  * @return The corresponding `Materials` object if found, or null if the index is invalid or the material does not exist.
  */
 fun Context.optionalMaterial(
-  index: Int = currentIndex,
-  found: String = "§cMaterial não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This material was not found.",
+    permission: String? = null,
 ): Material? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toMaterial() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toMaterial() ?: fail(found.asComponent)
 }
 
 /**
@@ -1219,90 +1222,13 @@ fun Context.optionalMaterial(
  * @return The corresponding `Materials` object associated with the provided name.
  */
 fun Context.material(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cMaterial não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This material was not found.",
+    permission: String? = null,
 ): Material {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toMaterial() ?: fail(found)
-}
-
-/**
- * Retrieves a nullable `MaterialData` object by the provided index.
- * If the argument is missing, it returns null.
- *
- * This function attempts to retrieve a string from the arguments at the specified index
- * and converts it to a `MaterialData` object. If the string does not correspond to a valid material data,
- * null is returned.
- *
- * ## Behavior
- * - If the specified index does not correspond to a valid string, it returns null.
- * - If the string does not correspond to a valid material data, it also returns null.
- *
- * @param index The index to retrieve the material data string from. Default is `currentIndex`.
- * @param permission Optional permission required to access the argument.
- * @return The corresponding `MaterialData` object if found, or null if the index is invalid or the material data does not exist.
- */
-fun Context.nullableMaterialData(
-  index: Int = currentIndex,
-  permission: String? = null,
-): MaterialData? {
-  return optionalString(index, permission)?.toMaterialData()
-}
-
-/**
- * Retrieves a nullable `MaterialData` object by the provided index.
- * If the argument is missing, it returns null.
- *
- * This function attempts to retrieve a string from the arguments at the specified index
- * and converts it to a `MaterialData` object. If the string does not correspond to a valid material data,
- * it fails with the specified error message.
- *
- * ## Behavior
- * - If the specified index does not correspond to a valid string, it returns null.
- * - If the string does not correspond to a valid material data, it fails with the provided found message.
- *
- * @param index The index to retrieve the material data string from. Default is `currentIndex`.
- * @param found The error message if the material data is not found. Default is "§cMaterial Data não encontrado."
- * @param permission Optional permission required to access the argument.
- * @return The corresponding `MaterialData` object if found, or null if the index is invalid or the material data does not exist.
- */
-fun Context.optionalMaterialData(
-  index: Int = currentIndex,
-  found: String = "§cMaterial Data não encontrado.",
-  permission: String? = null,
-): MaterialData? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toMaterialData() ?: fail(found)
-}
-
-/**
- * Retrieves a `MaterialData` object by the provided index.
- * If the argument is missing or invalid, it fails with the specified message.
- *
- * This function attempts to retrieve a string from the arguments at the specified index
- * and converts it to a `MaterialData` object. If the string does not correspond to a valid material data,
- * it fails with the appropriate error message.
- *
- * ## Behavior
- * - If the specified index does not correspond to a valid string, it fails with the provided empty message.
- * - If the string does not correspond to a valid material data, it fails with the provided found message.
- *
- * @param index The index to retrieve the material data string from. Default is `currentIndex`.
- * @param empty The error message if the argument is missing. Default is `usage`.
- * @param found The error message if the material data is not found. Default is "§cMaterial Data não encontrado."
- * @param permission Optional permission required to access the argument.
- * @return The corresponding `MaterialData` object associated with the provided name.
- */
-fun Context.materialData(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cMaterial Data não encontrado.",
-  permission: String? = null,
-): MaterialData {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toMaterialData() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toMaterial() ?: fail(found.asComponent)
 }
 
 /**
@@ -1322,10 +1248,10 @@ fun Context.materialData(
  * @return The corresponding `EntityType` object if found, or null if the index is invalid or the entity type does not exist.
  */
 fun Context.nullableEntityType(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): EntityType? {
-  return optionalString(index, permission)?.toEntityType()
+    return optionalString(index, permission)?.toEntityType()
 }
 
 /**
@@ -1346,12 +1272,12 @@ fun Context.nullableEntityType(
  * @return The corresponding `EntityType` object if found, or null if the index is invalid or the entity type does not exist.
  */
 fun Context.optionalEntityType(
-  index: Int = currentIndex,
-  found: String = "§cEntidade não encontrada.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This entity type was not found.",
+    permission: String? = null,
 ): EntityType? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toEntityType() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toEntityType() ?: fail(found.asComponent)
 }
 
 /**
@@ -1373,13 +1299,13 @@ fun Context.optionalEntityType(
  * @return The corresponding `EntityType` object associated with the provided name.
  */
 fun Context.entityType(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cEntidade não encontrada.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This entity type was not found.",
+    permission: String? = null,
 ): EntityType {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toEntityType() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toEntityType() ?: fail(found.asComponent)
 }
 
 /**
@@ -1399,10 +1325,10 @@ fun Context.entityType(
  * @return The corresponding `Sound` object if found, or null if the index is invalid or the sound does not exist.
  */
 fun Context.nullableSound(
-  index: Int = currentIndex,
-  permission: String? = null,
+    index: Int = currentIndex,
+    permission: String? = null,
 ): Sound? {
-  return optionalString(index, permission)?.toSound()
+    return optionalString(index, permission)?.toSound()
 }
 
 /**
@@ -1423,12 +1349,12 @@ fun Context.nullableSound(
  * @return The corresponding `Sound` object if found, or null if the index is invalid or the sound does not exist.
  */
 fun Context.optionalSound(
-  index: Int = currentIndex,
-  found: String = "§cSom não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    found: String = "<red>This sound was not found.",
+    permission: String? = null,
 ): Sound? {
-  val string = optionalString(index, permission) ?: return null
-  return string.toSound() ?: fail(found)
+    val string = optionalString(index, permission) ?: return null
+    return string.toSound() ?: fail(found.asComponent)
 }
 
 /**
@@ -1450,13 +1376,13 @@ fun Context.optionalSound(
  * @return The corresponding `Sound` object associated with the provided name.
  */
 fun Context.sound(
-  index: Int = currentIndex,
-  empty: String = usage,
-  found: String = "§cSom não encontrado.",
-  permission: String? = null,
+    index: Int = currentIndex,
+    empty: String = usage,
+    found: String = "<red>This sound was not found.",
+    permission: String? = null,
 ): Sound {
-  val string = optionalString(index, permission) ?: fail(empty)
-  return string.toSound() ?: fail(found)
+    val string = optionalString(index, permission) ?: fail(empty.asComponent)
+    return string.toSound() ?: fail(found.asComponent)
 }
 
 /**
@@ -1476,11 +1402,11 @@ fun Context.sound(
  * @return An array of strings if found, or null if the range is invalid or the array is empty.
  */
 fun Context.optionalArray(index: Int = currentIndex, finalIndex: Int = lastIndex): Array<out String>? {
-  val array = runCatching { arguments.sliceArray(index..finalIndex) }.getOrNull()
-  return when {
-    array.isNullOrEmpty() -> null
-    else -> array
-  }
+    val array = runCatching { arguments.sliceArray(index..finalIndex) }.getOrNull()
+    return when {
+        array.isNullOrEmpty() -> null
+        else -> array
+    }
 }
 
 /**
@@ -1500,10 +1426,10 @@ fun Context.optionalArray(index: Int = currentIndex, finalIndex: Int = lastIndex
  * @return An array of strings associated with the specified range.
  */
 fun Context.array(
-  index: Int = currentIndex,
-  finalIndex: Int = lastIndex,
-  message: String = usage,
-): Array<out String> = optionalArray(index, finalIndex) ?: fail(message)
+    index: Int = currentIndex,
+    finalIndex: Int = lastIndex,
+    message: String = usage,
+): Array<out String> = optionalArray(index, finalIndex) ?: fail(message.asComponent)
 
 /**
  * Retrieves a nullable list of strings from the arguments, based on the provided index range.
@@ -1522,11 +1448,11 @@ fun Context.array(
  * @return A list of strings if found, or null if the range is invalid or the list is empty.
  */
 fun Context.optionalList(index: Int = currentIndex, finalIndex: Int = lastIndex): List<String>? {
-  val list = runCatching { arguments.slice(index..finalIndex) }.getOrNull()
-  return when {
-    list.isNullOrEmpty() -> null
-    else -> list
-  }
+    val list = runCatching { arguments.slice(index..finalIndex) }.getOrNull()
+    return when {
+        list.isNullOrEmpty() -> null
+        else -> list
+    }
 }
 
 /**
@@ -1546,10 +1472,10 @@ fun Context.optionalList(index: Int = currentIndex, finalIndex: Int = lastIndex)
  * @return A list of strings associated with the specified range.
  */
 fun Context.list(
-  index: Int = currentIndex,
-  finalIndex: Int = lastIndex,
-  message: String = usage,
-): List<String> = optionalList(index, finalIndex) ?: fail(message)
+    index: Int = currentIndex,
+    finalIndex: Int = lastIndex,
+    message: String = usage,
+): List<String> = optionalList(index, finalIndex) ?: fail(message.asComponent)
 
 /**
  * Validates a boolean condition and fails with the specified message if the condition is false.
@@ -1563,7 +1489,8 @@ fun Context.list(
  *
  * @return True if the validation succeeds; otherwise, fails with the provided message.
  */
-fun Context.validate(valide: Boolean, message: String = usage): Boolean = if (valide) true else fail(message)
+fun Context.validate(valide: Boolean, message: String = usage): Boolean =
+    if (valide) true else fail(message.asComponent)
 
 /**
  * Validates a boolean condition and fails with the specified message if the condition is true.
@@ -1577,7 +1504,8 @@ fun Context.validate(valide: Boolean, message: String = usage): Boolean = if (va
  *
  * @return True if the validation succeeds; otherwise, fails with the provided message.
  */
-fun Context.validateNot(valide: Boolean, message: String = usage): Boolean = if (!valide) true else fail(message)
+fun Context.validateNot(valide: Boolean, message: String = usage): Boolean =
+    if (!valide) true else fail(message.asComponent)
 
 /**
  * Joins all arguments into a single string, separated by spaces.
@@ -1599,7 +1527,7 @@ fun Context.join(): String = arguments.joinToString(" ")
  * @return A single string representing all arguments joined together.
  */
 fun Context.joinNotEmpty(message: String): String {
-  return if (isEmpty()) fail(message) else join()
+    return if (isEmpty()) fail(message.asComponent) else join()
 }
 
 /**
@@ -1613,8 +1541,8 @@ fun Context.joinNotEmpty(message: String): String {
  * @return A single string representing the arguments joined together, or an empty string if none are found.
  */
 fun Context.joinInRange(index: Int = currentIndex, finalIndex: Int = lastIndex): String {
-  val list = optionalList(index, finalIndex) ?: return ""
-  return list.joinToString(" ")
+    val list = optionalList(index, finalIndex) ?: return ""
+    return list.joinToString(" ")
 }
 
 /**
@@ -1628,8 +1556,8 @@ fun Context.joinInRange(index: Int = currentIndex, finalIndex: Int = lastIndex):
  * @return A single string representing the joined arguments.
  */
 fun Context.joinNotEmpty(start: Int = 0, end: Int = lastIndex): String {
-  val joined = joinInRange(start, end)
-  return joined.ifEmpty { failUsage() }
+    val joined = joinInRange(start, end)
+    return joined.ifEmpty { failUsage() }
 }
 
 /**
@@ -1644,23 +1572,23 @@ fun Context.joinNotEmpty(start: Int = 0, end: Int = lastIndex): String {
  * @throws IllegalArgumentException if the property type is not serializable by command.
  */
 fun <T> Context.sync(value: T, prop: KMutableProperty1<T, Any>): Any {
-  val data = when (prop.returnType) {
-    typeOf<String>() -> joinNotEmpty()
-    typeOf<Int>() -> int()
-    typeOf<Double>() -> double()
-    typeOf<Boolean>() -> boolean()
-    typeOf<Long>() -> long()
-    typeOf<Float>() -> float()
-    typeOf<Byte>() -> byte()
-    typeOf<Short>() -> short()
-    else -> fail(
-      "§cNão foi possível sincronizar a propriedade §f${prop.name}§c, " +
-        "pois o seu tipo (§f${prop.returnType}§c) não é serializável por comando."
-    )
-  }
-  
-  prop.set(value, data)
-  return data
+    val data = when (prop.returnType) {
+        typeOf<String>() -> joinNotEmpty()
+        typeOf<Int>() -> int()
+        typeOf<Double>() -> double()
+        typeOf<Boolean>() -> boolean()
+        typeOf<Long>() -> long()
+        typeOf<Float>() -> float()
+        typeOf<Byte>() -> byte()
+        typeOf<Short>() -> short()
+        else -> fail(
+            ("<red>The property <white>${prop.name}</white> <red>could not be synchronized," +
+                    "because its type (<white>${prop.returnType}</white>) is not serializable by command.").asComponent
+        )
+    }
+
+    prop.set(value, data)
+    return data
 }
 
 /**
@@ -1672,7 +1600,7 @@ fun <T> Context.sync(value: T, prop: KMutableProperty1<T, Any>): Any {
  * @return True if the sender has the permission; otherwise, false.
  */
 fun Context.hasPermission(permission: String): Boolean {
-  return sender.hasPermission(permission)
+    return sender.hasPermission(permission)
 }
 
 /**
@@ -1685,7 +1613,7 @@ fun Context.hasPermission(permission: String): Boolean {
  * @return True if the validation succeeds; otherwise, fails with the provided message.
  */
 fun Context.validateConsole(
-  message: String = "§cApenas o Console pode executar este comando.",
+    message: String = "<red>Only console can run this command.",
 ) = validate(isConsole, message)
 
 /**
@@ -1698,7 +1626,7 @@ fun Context.validateConsole(
  * @return True if the validation succeeds; otherwise, fails with the provided message.
  */
 fun Context.validatePlayer(
-  message: String = "§cApenas jogadores podem executar este comando.",
+    message: String = "<red>Only players can run this command.",
 ) = validate(isPlayer, message)
 
 /**
@@ -1712,8 +1640,8 @@ fun Context.validatePlayer(
  * @return True if the validation succeeds; otherwise, fails with the provided message.
  */
 fun Context.validatePermission(
-  permission: String,
-  message: String = "§cVocê não tem permissão para executar esse comando.",
+    permission: String,
+    message: String = "<red>You don't has permission to run this command.",
 ) = validate(hasPermission(permission), message)
 
 /**
@@ -1721,7 +1649,9 @@ fun Context.validatePermission(
  *
  * This function retrieves the usage information from the instructor and sends it as a message to the sender.
  */
-fun Context.msgUsage() = msg(instructor.usage)
+fun Context.msgUsage() {
+    sender.sendMessage(instructor.componentUsageMessage)
+}
 
 /**
  * Sends a message to the command sender.
@@ -1731,7 +1661,7 @@ fun Context.msgUsage() = msg(instructor.usage)
  * @param message The message to send.
  */
 fun Context.msg(message: String) {
-  sender.sendMessage(message)
+    sender.sendMessage(message.asComponent)
 }
 
 /**
@@ -1742,8 +1672,8 @@ fun Context.msg(message: String) {
  *
  * @param message The message to send as a `TextComponent`.
  */
-fun Context.msg(message: TextComponent) {
-  if (isPlayer) player.spigot().sendMessage(message)
+fun Context.msg(message: Component) {
+    sender.sendMessage(message)
 }
 
 /**
@@ -1756,5 +1686,5 @@ fun Context.msg(message: TextComponent) {
  * @param pitch The pitch of the sound. Default is `1f`.
  */
 fun Context.playSound(sound: Sound, volume: Float = 1f, pitch: Float = 1f) {
-  if (isPlayer) player.playSound(player.location, sound, volume, pitch)
+    if (isPlayer) player.playSound(player.location, sound, volume, pitch)
 }
