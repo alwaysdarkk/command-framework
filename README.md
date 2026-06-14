@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.github.networkharmony:command-framework:1.2.0")
+  implementation("com.github.alwaysdarkk:command-framework:1.2.0-modern")
 }
 ```
 
